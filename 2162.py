@@ -27,7 +27,7 @@ def main():
     # print length of groups
     print(len(groups))
     # find largest group
-    print(findLargestGroup(groups))
+    print(findLargestGroup())
 
     return
 
@@ -100,7 +100,7 @@ def addGroup(a, b):
 
     return
 
-def findLargestGroup(groups):
+def findLargestGroup():
     largest = 0
 
     for i in groups:
