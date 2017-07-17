@@ -1,129 +1,111 @@
-def isIntersect(a, b):
-    # 점 A는 점 B보다 왼쪽에, 점 C는 점 D보다 왼쪽에.
-    if a[0] > a[2]:
-        Ax = a[2]
-        Ay = a[3]
-        Bx = a[0]
-        By = a[1]
+# Global Variables
+lines = []
+groups = []
+
+
+def main():
+    N = int(input())
+
+    i = 0
+    while i < N:
+        coordinate = [int(j) for j in input().split(' ')]
+        item = {
+            'x1': coordinate[0],
+            'y1': coordinate[1],
+            'x2': coordinate[2],
+            'y2': coordinate[3],
+            'group': None
+        }
+        lines.append(item)
+        i += 1
+
+    for i in range(0, N-1):
+        for j in range(i+1, N):
+            if intersect(lines[i], lines[j]):
+                addGroup(i, j)
+    
+    # print length of groups
+    print(len(groups))
+    # find largest group
+    print(findLargestGroup(groups))
+
+    return
+
+def intersect(l1, l2):
+    cond1 = l1['x1'] > l2['x1'] and l1['x2'] > l2['x2']
+    cond2 = l1['y1'] > l2['y1'] and l1['y2'] > l2['y2']
+    cond3 = l1['x1'] < l2['x1'] and l1['x2'] < l2['x2']
+    cond4 = l1['y1'] < l2['y1'] and l1['y2'] < l2['y2']
+
+#   a and b or a and d or c and b or c and d
+#   a * b + a * d + c * b + c * d
+#   a * (b + d) + c * (b + d)
+#   (a + c) * (b + d)
+
+    if (cond1 or cond3) and (cond2 or cond4):
+        return False
+    
+    return True
+
+def addGroup(a, b):
+    l1 = lines[a]
+    l2 = lines[b]
+
+    group = {}
+    g_num = None
+
+    cond1 = l1['group'] is None
+    cond2 = l2['group'] is None
+
+    # append new group
+    if cond1 and cond2:
+        g_num = len(groups)
+
+        group = {a, b}
+        groups.append(group)
+
+    # append line to the other line's group
+    elif cond1:
+        g_num = l2['group']
+
+        group = groups[g_num] | {a, b}
+
+    elif cond2:
+        g_num = l1['group']
+
+        group = groups[g_num] | {a, b}
+
+    # bind two groups into a group
     else:
-        Ax = a[0]
-        Ay = a[1]
-        Bx = a[2]
-        By = a[3]
-
-    if b[0] > b[2]:
-        Cx = b[2]
-        Cy = b[3]
-        Dx = b[0]
-        Dy = b[1]
-    else:
-        Cx = b[0]
-        Cy = b[1]
-        Dx = b[2]
-        Dy = b[3]
-
-    # 평범한 두 선분
-    if Ax != Bx and Cx != Dx and Ay != By and Cy != Dy:
-        slopeAB = ( Ay - By ) / ( Ax - Bx )
-        slopeCD = ( Cy - Dy ) / ( Cx - Dx )
-
-        x = ( ( Cy - slopeCD * Cx ) - ( Ay - slopeAB * Ax ) ) / ( slopeAB - slopeCD )
-
-        if Ax <= x <= Bx and Cx <= x <= Dx:
-            return True
-
-    # 평행한 두 선분
-    if Ax == Bx and Cx == Dx:
-        if Ax == Cx:
-            return True
-        else:
-            return False
-
-    elif Ay == By and Cy == Dy:
-        if Ay == Cy:
-            return True
-        else:
-            return False
-
-    # 한 선분이 x축, y축에 평행한 경우
-    for i in [0, 1]:
-        if Ax == Bx or Ay == By:
-            slopeCD = ( Cy - Dy ) / ( Cx - Dx )
-            if Ax == Bx:
-                if Ay > By:
-                    return Ay >= ( slopeCD * (Ax - Cx) + Cy ) >= By
-                else:
-                    return Ay <= ( slopeCD * (Ax - Cx) + Cy ) <= By
-            else:
-                if Ax > Bx:
-                    return Ax >= ( (Ay - Cy) / slopeCD + Cx ) >= Bx
-                else:
-                    return Ax <= ( (Ay - Cy) / slopeCD + Cx ) <= Bx
+        g1 = l1['group']
+        g2 = l2['group']
         
-        ax = Ax
-        ay = Ay
-        bx = Bx
-        by = By
-        Ax = Cx
-        Ay = Cy
-        Bx = Dx
-        By = Dy
-        Cx = ax
-        Cy = ay
-        Dx = bx
-        Dy = by
+        g_num = g1
 
-    # HARD CODING
+        if not g1 is g2:
+            group = groups[g1] | groups[g2]
 
-    return False
+            for i in list(groups[g2]):
+                lines[i]['group'] = g1
+            
+            del groups[g2]
 
-def assignGroup(a, b):
-    global group
+        else:
+            group = groups[g1]
 
-    inGroup = []
+    lines[a]['group'] = g_num
+    lines[b]['group'] = g_num
+    
+    groups[g_num] = group
 
-    for i in range(0, len(group)):
-        if b in group[i]:
-            inGroup.append(i)
+    return
 
-    if len(inGroup) != 0:
-        joinGroup = []
-        for i in inGroup:
-            joinGroup = joinGroup + group[i]
+def findLargestGroup(groups):
+    largest = 0
 
-        # 첫번째 공통 그룹으로 나머지 그룹을 join시킴.
-        isFirstGroup = True
-        # group이 pop될때마다 인덱스가 1씩 당겨지므로 j를 통해 타겟 인덱스 조정.
-        j = 0
-        for i in inGroup:
-            if isFirstGroup:
-                group[i] = group[i] + joinGroup
-                isFirstGroup = False
-                continue
+    for i in groups:
+        largest = len(i) if len(i) > largest else largest
 
-            group.pop(obj=group[i - j])
-            j += 1
+    return largest
 
-    else:
-        group = group + [[a, b]]
-
-n = int( input() )
-c = []
-group = []
-
-# 입력 받는 부분
-for i in range(0, n):
-
-    a = input().split(' ')
-    for j in range(0, 4):
-        a[j] = int(a[j])
-
-    c.append(a)
-
-# 본격
-for i in range(0, n-1):
-    for j in range(i+1, n):
-        if isIntersect(c[i], c[j]):
-            assignGroup(i, j)
-
-print(group)
+main()
