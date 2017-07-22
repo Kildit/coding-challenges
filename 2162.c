@@ -1,32 +1,31 @@
 #include <stdio.h>
 
-int printArr();
-
 int main() {
-    int N;
-    scanf("%d", &N);
+    short N;
+    scanf("%hd", &N);
 
-    int x1[N],
-        y1[N],
-        x2[N],
-        y2[N],
-        g[N],
-        grouplength[N],
-        lastgroup = 1;
+    short x1[N],
+          y1[N],
+          x2[N],
+          y2[N],
+          g[N],
+          grouplength[N],
+          lastgroup = 1;
 
-    for (int i = 0; i < N; i++) {
-        scanf("%d %d %d %d", &x1[i], &y1[i], &x2[i], &y2[i]);
+    scanf("%hd %hd %hd %hd", &x1[0], &y1[0], &x2[0], &y2[0]);
+    g[0] = 0;
+    grouplength[0] = 0;
+
+    for (short i = 1; i < N; i++) {
+        scanf("%hd %hd %hd %hd", &x1[i], &y1[i], &x2[i], &y2[i]);
         g[i] = 0;
         grouplength[i] = 0;
-        if (i == 0) {
-            continue;
-        }
 
-        for (int j = 0; j < i; j++) {
-            int c1 = x1[i] > x1[j] && x2[i] > x2[j],
-                c2 = y1[i] > y1[j] && y2[i] > y2[j],
-                c3 = x1[i] < x1[j] && x2[i] < x2[j],
-                c4 = y1[i] < y1[j] && y2[i] < y2[j];
+        for (short j = 0; j < i; j++) {
+            char c1 = x1[i] > x1[j] && x2[i] > x2[j],
+                 c2 = y1[i] > y1[j] && y2[i] > y2[j],
+                 c3 = x1[i] < x1[j] && x2[i] < x2[j],
+                 c4 = y1[i] < y1[j] && y2[i] < y2[j];
             
             if ((c1 || c3) && (c2 || c4)) {
                 continue;
@@ -42,7 +41,7 @@ int main() {
                 continue;
 
             } else {
-                for (int k = 0; k <= i; k++) {
+                for (short k = 0; k <= i; k++) {
                     if (g[k] == g[i]) {
                         g[k] = g[j];
                     }
@@ -51,14 +50,14 @@ int main() {
         }
     }
 
-    int maxg = 1;
+    short maxg = 1;
 
-    for (int i = 0; i < N; i++) {
+    for (short i = 0; i < N; i++) {
         if (maxg < ++grouplength[g[i]])
             maxg = grouplength[g[i]];
     }
 
-    printf("%d\n%d\n", --lastgroup, maxg);
+    printf("%hd\n%hd\n", --lastgroup, maxg);
 
     return 0;
 }
