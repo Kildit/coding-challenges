@@ -1,58 +1,64 @@
 #include <stdio.h>
 
-typedef int bool;
-#define true 1
-#define false 0
-
-int intersection(int x1, int y1, int x2, int y2, int X1, int Y1, int X2, int Y2) {
-    int a = (y1 - y2) / (x1 - x2) == (Y1 - Y2) / (X1 - X2),
-        b = (y1 - y2) * (X1 - X2),
-        c = x1 - x2;
-
-    if (a) {
-        // 두 선분이 평행한 경우.
-        return false;
-    }
-
-    double x = ( b * (x1 - X1) - c * (y1 - Y1) * (X1 - X2) ) / ( b - (Y1 - Y2) ),
-        x_s = (double) x1,
-        x_e = (double) x2;
-
-    // 한 점에서 만나는 경우
-    if (x_s <= x & x <= x_e)
-        return true;
-
-    // 평행하진 않지만 그냥 안 만나는 경우
-    else
-        return false;
-}
+int printArr();
 
 int main() {
-    int n;
-    scanf("%d", &n);
+    int N;
+    scanf("%d", &N);
 
-    int line[n][4];
-    // line[a][b]
-    // b  0  1  2  3
-    //    x1 y1 x2 y2
+    int x1[N],
+        y1[N],
+        x2[N],
+        y2[N],
+        g[N],
+        grouplength[N],
+        lastgroup = 1;
 
-    for(int i = 0; i < n; i++) {
-        scanf("%d %d %d %d", &line[i][0], &line[i][1], &line[i][2], &line[i][3]);
-    }
+    for (int i = 0; i < N; i++) {
+        scanf("%d %d %d %d", &x1[i], &y1[i], &x2[i], &y2[i]);
+        g[i] = 0;
+        grouplength[i] = 0;
+        if (i == 0) {
+            continue;
+        }
 
-    int groups = n;
+        for (int j = 0; j < i; j++) {
+            int c1 = x1[i] > x1[j] && x2[i] > x2[j],
+                c2 = y1[i] > y1[j] && y2[i] > y2[j],
+                c3 = x1[i] < x1[j] && x2[i] < x2[j],
+                c4 = y1[i] < y1[j] && y2[i] < y2[j];
+            
+            if ((c1 || c3) && (c2 || c4)) {
+                continue;
+            }
+            if (g[i] + g[j] == 0) {
+                g[i] = lastgroup++;
+                g[j] = g[i];
+                continue;
 
-    // y = ax + b
+            } else if (g[i] * g[j] == 0) {
+                g[i] = g[i] + g[j];
+                g[j] = g[i];
+                continue;
 
-    for(int i = 0; i < n; i++) {
-        for(int j = 0; j < i; j++) {
-            bool isCollapse = intersection(line[i][0], line[i][1], line[i][2], line[i][3], line[j][0], line[j][1], line[j][2], line[j][3]);
-            if (isCollapse) {
-                groups--;
+            } else {
+                for (int k = 0; k <= i; k++) {
+                    if (g[k] == g[i]) {
+                        g[k] = g[j];
+                    }
+                }
             }
         }
     }
 
-    printf("%d", groups);
+    int maxg = 1;
+
+    for (int i = 0; i < N; i++) {
+        if (maxg < ++grouplength[g[i]])
+            maxg = grouplength[g[i]];
+    }
+
+    printf("%d\n%d\n", --lastgroup, maxg);
+
     return 0;
 }
