@@ -1,5 +1,6 @@
 import re
 import os
+import datetime
 
 from bs4 import BeautifulSoup
 import requests
@@ -53,9 +54,9 @@ for item in soup.select('#problem-info td'):
 for tag in soup.select('#problem_tags li a'):
     problem['tags']['val'].append(tag.text)
 
-
 # create markdown
-md = '[문제 바로가기](' + url + ')\n\n'
+md = 'lastupdated: ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '\n\n'
+md += '[문제 바로가기](' + url + ')\n\n'
 md += '# ' + problem['title']['val'] + '\n\n'
 
 for key in ['desc', '---', 'val']:
@@ -91,10 +92,13 @@ for key in ['description', 'input', 'output', 'tags']:
         md += re.sub('^[\s+]*', '', item) + '\n\n'
 
 # create problem folder
+filename = problem['id'] + ' - ' + problem['title']['val']
+ # 폴더이름으로 못 쓰는 특수문자들 제거
+filename = re.sub('[\\|\/|:|\*|\?|"|<|>|\|]+', ' ', filename)
+filename += '/readme.md'
 
-filename = problem['id'] + ' - ' + problem['title']['val'] + '/readme.md'
 
-# idk how this is working, going to search about this later;; https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
+# 이 부분은 잘 모르겠어서 스택오버플로우에서 찾아 씀. 미래에 자세히 알아볼 것!  https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
 os.makedirs(os.path.dirname(filename), exist_ok=True)
 with open(filename, "w") as f:
     f.write(md)
